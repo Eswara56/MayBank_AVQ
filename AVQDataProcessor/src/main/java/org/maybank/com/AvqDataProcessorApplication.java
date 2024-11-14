@@ -17,9 +17,9 @@ public class AvqDataProcessorApplication {
 	public static void main(String[] args) {
 		ApplicationContext context =  SpringApplication.run(AvqDataProcessorApplication.class, args);
 DataProcessor data=context.getBean(DataProcessor.class);
-//	data.processFiles();
+	data.processFiles();
 
-data.processDetails();
+//data.processDetails();
 
 
 		

@@ -17,11 +17,8 @@ import org.maybank.com.Repository.SystemConfigRepository;
 import org.maybank.com.Service.DetailFileService;
 import org.maybank.com.Service.HeaderFileService;
 import org.maybank.com.Service.TrailerFileService;
-import org.maybank.com.entity.DetailFileEntity;
 import org.maybank.com.entity.EGLDetail;
-import org.maybank.com.entity.HeaderFileEntity;
 import org.maybank.com.entity.SystemConfig;
-import org.maybank.com.entity.TrailerFileEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -41,15 +38,12 @@ public class DataProcessor {
 
     public void processFiles() {
         // Assuming we are retrieving for APPL_CODE = "PW"
-        String applCode = "PW";
-        
+        String applCode = "PW"; 
         // Retrieve the system configuration for the specified APPL_CODE
         SystemConfig systemConfig = systemConfigRepository.findByApplCode(applCode);
-        
         if (systemConfig == null) {
             throw new RuntimeException("System configuration for '" + applCode + "' not found in database");
-        }
-        
+        }  
         // Retrieve paths for each file type
         String baseDirectory = "D:/Work/AvqFiles/"; // Base directory where files are located
         String headerFilePath = baseDirectory + systemConfig.getHeaderFile();
@@ -62,24 +56,24 @@ public class DataProcessor {
         processFile(headerFilePath,detailFilePath,trailerFilePath); 
     }
 	
-	public void processFile(String headerFilePath1, String detailFilePath1, String footerFilePath1) {
+	public void processFile(String headerFilePath1, String detailFilePath1, String trailerFilePath1) {
 	    try {
-	        // Process Header File
+//	         Process Header File
 	        try (BufferedReader headerReader = new BufferedReader(new FileReader(headerFilePath1))) {
-	            List<HeaderFileEntity> headers = headerFileService.processAndMapHeaders(headerReader);
-	            headerFileService.saveAll(headers); // Save to target database
+	            headerFileService.processAndMapHeaders(headerReader);
 	        }
 
 	        // Process Detail File
-	        try (BufferedReader detailReader = new BufferedReader(new FileReader(detailFilePath1))) {
-	            List<DetailFileEntity> details = detailFileService.processAndMapDetails(detailReader);
-	            detailFileService.saveAll(details); // Save to target database
+
+	    	try (BufferedReader detailReader = new BufferedReader(new FileReader(detailFilePath1))) {
+	          detailFileService.processAndMapDetails(detailReader);
+	            
 	        }
 
 	        // Process Footer File
-	        try (BufferedReader footerReader = new BufferedReader(new FileReader(footerFilePath1))) {
-	            List<TrailerFileEntity> footers = trailerFileService.processAndMapFooters(footerReader);
-	            trailerFileService.saveAll(footers); // Save to target database
+	        try (BufferedReader footerReader = new BufferedReader(new FileReader(trailerFilePath1))) {
+	           trailerFileService.processAndMapTrailers(footerReader);
+	           
 	        }
 
 	    } catch (IOException e) {
@@ -88,32 +82,7 @@ public class DataProcessor {
 	    
 	}
 	    
-	    
-	    public void processDetails() {
-	    	
-	    String 	systemId="PW";
-	    String fileType="DETAIL";
-	        // Retrieve field configurations from the database by systemId and fileType, ordered by fieldOrder
-	        List<EGLDetail> eglDetailList = eglDetailRepository.findBySystemIdAndFileTypeOrderByFieldOrder(systemId, fileType);
-
-	        // Check if the list is null or empty and handle it
-	        if (eglDetailList == null || eglDetailList.isEmpty()) {
-	            System.out.println("No field configurations found for SYSTEM_ID = '" + systemId + "' and FILE_TYPE = '" + fileType + "'");
-	            return;
-	        }
-
-	        // Extract field names in order
-	        for (EGLDetail field : eglDetailList) {
-	            if (field != null && field.getFIELD_NAME() != null) {
-	                System.out.println("Field Name: " + field.getFIELD_NAME() + ", Order: " + field.getFIELD_ORDER());
-
-		            System.out.println(field.toString()); 
-	            } else {
-	                System.out.println("Skipping null field in eglDetailList");
-	            }
-	            
-	        } 
-	}
+	
 	
 		
 	}
